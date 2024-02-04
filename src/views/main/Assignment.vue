@@ -1,9 +1,9 @@
 <template>
   <div class="single-course-container">
     <!--loader Until request finishes-->
-    <Loading v-if="loading"></Loading>
+    <Loading v-if="loading || !initialized"></Loading>
 
-    <!--Single Course Page After Fetching Data-->
+    <!--Single Assignment Page After Fetching Data-->
     <template v-else>
       <!--Name and Intro section-->
       <v-container fluid class="IntroSection pt-0 pb-0">
@@ -30,6 +30,7 @@
               class="white--text"
             >
               <v-row :justify="$vuetify.breakpoint.smAndDown ? 'center' : 'start'">
+                
                 <!-- Assignment Name -->
                 <v-col cols="auto">
                   <h2
@@ -39,22 +40,22 @@
                     }"
                     class="font-weight-medium mb-3 text-h1"
                   >
-                    {{ course.name }}
+                    {{ assignment.name }}
                   </h2>
                 </v-col>
-
                 <!-- Assignment Attribution -->
                 <v-col cols="auto" class="align-bottom">
-                  <div class="text-body font-weight-light mb-3">
-                    Created By
-                    <span class="text-body white--text font-weight-black mb-3">{{
-                      `${course.instructor.firstName} ${course.instructor.lastName}`
+                  <div class="text-h3 font-weight-light mb-3">
+                    Class
+                    <span class="text-h3 white--text font-weight-black mb-3">{{
+                      assignment.classID
                     }}</span>
                   </div>
                 </v-col>
               </v-row>
-              <!-- Course Difficulty -->
-              <div
+
+              <!-- Assignment Difficulty -->
+              <!-- <div
                 :class="{
                   'text-center': $vuetify.breakpoint.smAndDown,
                 }"
@@ -62,8 +63,8 @@
                 <v-chip class="px-5" text-color="white" color="deep-purple">
                   {{ course.difficulty }}
                 </v-chip>
-              </div>
-              <!-- Course Description -->
+              </div> -->
+              <!-- Assignment Description -->
               <div
                 :class="{
                   'text-h4': $vuetify.breakpoint.smAndUp,
@@ -72,18 +73,30 @@
                 }"
                 class="font-weight-light mb-3 mt-6"
               >
-                {{ course.description }}
+                Due: {{ assignment.dueDate ? new Date(assignment.dueDate).toLocaleString() : 'No Due Date' }}
               </div>
             </v-col>
           </v-row>
         </v-container>
       </v-container>
 
-      <!-- Create Assignment Component -->
-      <AssignCourse 
-      v-if="course" 
-      :course="course">
-      </AssignCourse>
+      <!-- Toolbar -->
+      <v-container>
+        <v-row align="center" justify="end">
+          <v-col cols="auto">
+            
+            <!-- Submit Assignment Button -->
+            <v-btn 
+            @click="udpateAssignmentSubmissionState(!assignmentSubmission.submitted)"
+            class="ma-0" 
+            color="#b8860b"
+            >
+              <v-icon left> {{!assignmentSubmission.submitted ? 'mdi-check' : 'mdi-arrow-u-right-bottom'}} </v-icon>
+              {{!assignmentSubmission.submitted ? 'Mark as Complete' : 'Unsubmit'}}
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-container>
 
       <!-- "Content", "Threads", and "Activity" Tabs -->
       <!-- <v-tabs
@@ -97,7 +110,7 @@
         hiding these tabs as they're not yet needed for courses,
         only instructor created assignments
         <v-tab key="1" v-if="false">Threads</v-tab>
-        <v-tab key="2" v-if="ownsCourse && false">Add Activity</v-tab>
+        <v-tab key="2" v-if="ownsAssignment && false">Add Activity</v-tab>
       </v-tabs> -->
 
       <!-- "Content" Tab Container -->
@@ -107,17 +120,19 @@
           <CourseContent
             @refetch="getCourse(false)"
             :activities="course.activities"
-            v-if="course.activities.length"
+            v-if="course && course.activities.length"
           />
           <div v-else class="text-overline my-6 text-center">
             Oops, It appears that there is no content yet.
           </div>
         </template>
+
         <!-- Course Threads (chat messages) Tab -->
         <template v-else-if="currentTab == 1">
           <div class="text-h1 text-center">Threads</div>
           <CourseThreads />
         </template>
+        
         <!-- Create Activity Tab -->
         <template v-else-if="currentTab == 2">
           <div class="text-h1 text-center">Create Activity</div>
@@ -141,8 +156,9 @@ import img1 from '@/assets/course_1.svg';
 import img2 from '@/assets/course_2.svg';
 import img3 from '@/assets/course_3.svg';
 import api from '@/api';
+import { defineComponent } from '@vue/runtime-dom';
 
-export default {
+export default defineComponent({
   components: {
     Loading,
     CourseContent,
@@ -153,11 +169,19 @@ export default {
   data() {
     return {
       loading: true,
+      user: null,
+      assignment: null,
       course: null,
+      assignmentSubmission: null,
       image: null,
       currentTab: 0,
-      ownsCourse: false,
+      ownsAssignment: false,
     };
+  },
+  computed: {
+    initialized() {
+      return this.assignment && this.course && this.assignmentSubmission;
+    },
   },
   methods: {
     initializeImage(courseId) {
@@ -169,28 +193,115 @@ export default {
         this.image = img3;
       }
     },
+    /**
+     * Retrieve assignment data for this page
+     * @param {boolean} load whether to show the loader component while awaiting the assignment data
+     */
+    async getAssignment(load = false) {
+      // this.currentTab = 0;
+      if (load) {
+        this.loading = true;
+      }
+
+      const { assignmentId } = this.$route.params;
+      this.assignment = await api.fetchSingleAssignment(assignmentId);
+
+      this.loading = false;
+    },
+    /**
+     * Retrieve course data for this assignment
+     * @param {boolean} load whether to show the loader component while awaiting the course data
+     */
     async getCourse(load = false) {
       this.currentTab = 0;
       if (load) {
         this.loading = true;
       }
-      const { courseId } = this.$route.params;
-      this.course = await api.fetchSingleCourse(courseId);
 
-      // If user does not own course
-      const user = JSON.parse(localStorage.getItem('userData'));
-      if (user.id === this.course.instructor.id) {
-        this.ownsCourse = true;
+      this.course = await api.fetchSingleCourse(this.assignment.courseID);
+
+      // check if user owns assignment
+      if (this.user.id === this.assignment.instructorID) {
+        this.ownsAssignment = true;
       }
       this.loading = false;
     },
+    /**
+     * Try and fetch an existing submission of this user
+     * for this assignment, creating one if none exists
+     */
+    async getAssignmentSubmission() {
+      // request assingment submission for current user
+      await api.fetchSingleAssignmentSubmission(this.assignment.id, this.user.id)
+        .then((res) => {
+          // check if server responded with a valid submission
+          if (res) {
+            // console.log('found existing submission');
+            return res;
+          }
+          // create new submission if none was found
+          else {
+            // console.log('no submission yet');
+            let newSubmissionDetails = {
+              assignmentID: this.assignment.id,
+              userID: this.user.id
+            }
+            return api.createAssignmentSubmission(newSubmissionDetails);
+          }
+        })
+        .then((submission) => {
+          // console.log('submission data: ', submission);
+          this.assignmentSubmission = submission;
+        });
+    },
+    /**
+     * Update the submission state of the assignment submission
+     * @param {boolean} submitted whether to mark the assignment complete or incomplete
+     */
+    async udpateAssignmentSubmissionState(submitted) {
+
+      let submissionEdits = {
+        id: this.assignmentSubmission.id,
+        submitted,
+      };
+
+      // update assignment submission on server
+      await api.updateAssignmentSubmission(submissionEdits).then((res) => {
+
+
+        if (res !== false) {
+          // update the local assignment submission with the server response
+          this.assignmentSubmission = res;
+          // notify the user of successful assignment update
+          this.$store.state.snackbarMessage = `Assignment ${submitted ? 'submitted' : 'unsubmitted'}`;
+          this.$store.state.snackbar = true;
+          this.$store.state.snackbarColor = submitted ? 'success' : 'info';
+        }
+        else {
+          // notify the user of an unsuccessful assignment update
+          this.$store.state.snackbarMessage = `Unable to ${submitted ? 'submit' : 'unsubmit'} assignment`;
+          this.$store.state.snackbar = true;
+          this.$store.state.snackbarColor = 'error';
+        }
+      });
+    },
   },
   async created() {
-    const { courseId } = this.$route.params;
-    this.initializeImage(courseId);
-    await this.getCourse();
-  },
 
+    // get user info
+    this.user = JSON.parse(localStorage.getItem('userData'));
+
+    // fetch the assignment info,
+    // the related course,
+    // and any existing user submission
+    await this.getAssignment(true)
+      .then(() => this.getCourse())
+      .then(() => this.getAssignmentSubmission());
+
+    // console.log('Assignment Submission: \n' + JSON.stringify(this.assignmentSubmission));
+
+    this.initializeImage(this.course._id);
+  },
   beforeRouteEnter(to, from, next) {
     if (!localStorage.getItem('userData')) {
       next({ name: 'login' });
@@ -198,7 +309,7 @@ export default {
       next();
     }
   },
-};
+});
 </script>
 
 <style scoped>
