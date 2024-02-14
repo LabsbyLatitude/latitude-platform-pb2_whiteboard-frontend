@@ -141,8 +141,6 @@
       </v-container>
     </template>
 
-    <!--Footer-->
-    <Footer></Footer>
   </div>
 </template>
 
