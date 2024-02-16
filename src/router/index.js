@@ -44,7 +44,7 @@ const routes = [
         component: () => import('@/views/main/Course'),
       },
       {
-        path: '/assignment/:assignmentId',
+        path: '/assignment/:assignmentID',
         name: 'assignment',
         component: () => import('@/views/main/Assignment'),
       },
@@ -54,7 +54,7 @@ const routes = [
         component: () => import('@/views/Learner/MyProfile'),
       },
       {
-        path: '/class',
+        path: '/class/:classID',
         name: 'class',
         component: () => import('@/views/main/Class'),
       },
