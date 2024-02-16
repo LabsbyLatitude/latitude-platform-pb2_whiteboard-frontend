@@ -37,6 +37,15 @@ store.state.currentUser = USERDATA.user;
 
 export default {
 
+  // ************************    General    ************************ //
+
+  isInstructorOrAdmin(user) {
+    if (!user) {
+      return false;
+    }
+    return ['admin', 'instructor'].includes(user.type);
+  },
+
   // ************************ Authentication ************************ //
 
   async loginUser(user) {
@@ -211,7 +220,34 @@ export default {
       .catch(() => false);
   },
 
+  // ************************ Classes           ************************ //
+
+  async fetchClass(id) {
+    const config = {
+      headers: {
+        Authorization: `Bearer ${JSON.parse(localStorage.getItem('userToken'))}`,
+      },
+    };
+
+    return axios
+      .get(`${baseURL}/api/v1/class/${id}`, config)
+      .then((response) => response.data.data)
+      .catch(() => false);
+  },
+
   // ************************ Assignments       ************************ //
+
+  async fetchClassAssignments(classID) {
+    const config = {
+      headers: {
+        Authorization: `Bearer ${JSON.parse(localStorage.getItem('userToken'))}`,
+      },
+    };
+    return axios
+      .get(`${baseURL}/api/v1/assignments/?classID=${classID}`, config)
+      .then((response) => response.data)
+      .catch(() => false);
+  },
 
   async fetchAllAssignments() {
     const config = {
