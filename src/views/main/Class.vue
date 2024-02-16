@@ -45,9 +45,9 @@
                 </v-col>
               </v-row>
 
-              <!-- Header Desc. -->
+              <!-- Class Desc. -->
               <v-row>
-
+                
               </v-row>
             </v-col>
           </v-row>
@@ -56,6 +56,21 @@
 
       </v-container>
     </header>
+
+    <!-- Assignment Sections -->
+    <v-tabs
+      centered
+      dark
+      background-color="#3f3d56"
+      v-model="currentTab"
+      :fixed-tabs="!$vuetify.breakpoint.xs"
+    >
+      <v-tab key="0" v-if="isInstructorOrAdmin">Scheduled</v-tab>
+      <v-tab key="1">Assignments</v-tab>
+      <v-tab key="2" v-if="!isInstructorOrAdmin">Completed</v-tab>
+      <v-tab key="3" v-if="isInstructorOrAdmin">Grades</v-tab>
+    </v-tabs>
+    
 
   </div>
 </template>
@@ -74,21 +89,62 @@ export default defineComponent({
   data() {
     return {
       user: null,
-      classData: {
-        title: 'My Class Title',
-        instructorID: 1,
-      },
-      headerImage: null,  
+      classData: null,
+      assignments: null,
+      headerImage: null,
+      currentTab: 0,
     }
   },
   computed: {
+    isInstructorOrAdmin() {
+      return api.isInstructorOrAdmin(this.user);
+    }
   },
-  created() {
+  async created() {
+    // get user info from local storage
     this.user = JSON.parse(localStorage.getItem('userData'));
+
+    // set class header image
     this.headerImage = this.user.type === 'instructor' || this.user.type === 'admin' ?
       classHeaderImage2 : classHeaderImage1;
-  }
-})
+
+    // set default tab to assignments for teachers
+    // @todo, doesn't work
+    this.currentTab = this.isInstructorOrAdmin ? 1 : 0;
+
+    // fetch class and assignments data
+    let { classID } = await this.getClassData();
+    this.getClassAssignments(classID);
+
+  },
+  methods: {
+    async getClassData() {
+      const { classID } = this.$route.params;
+      // @TODO uncomment this
+      // this.classData = await api.fetchClass(classID);
+      //@TODO DELETE THIS
+      this.classData = {
+        title: 'My Class Title',
+        instructorID: 1,
+      };
+
+      return Promise.resolve(this.classData);
+    },
+    /**
+     * Retrieve assignments data for this class
+     * @param {boolean} load whether to show the loader component while awaiting the assignment data
+     */
+    async getClassAssignments(classID) {
+
+      this.assignments = await api.fetchClassAssignments(classID);
+      
+      //@TODO DELETE THIS
+      this.assignments = await api.fetchAllAssignments();
+      
+
+    },
+  },
+},)
 </script>
 
 <style>
