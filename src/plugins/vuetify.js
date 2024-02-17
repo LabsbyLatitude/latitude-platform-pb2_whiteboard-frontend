@@ -2,7 +2,11 @@ import Vue from 'vue';
 import Vuetify from 'vuetify/lib';
 import '@/sass/overrides.sass';
 
-Vue.use(Vuetify);
+Vue.use(Vuetify, {
+  options: {
+    customProperties: true,
+  },
+});
 
 const theme = {
   primary: '#353445',
@@ -20,5 +24,8 @@ export default new Vuetify({
       dark: theme,
       light: theme,
     },
+  },
+  options: {
+    customProperties: true,
   },
 });
