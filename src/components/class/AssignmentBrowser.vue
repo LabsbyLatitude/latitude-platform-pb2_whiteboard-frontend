@@ -2,7 +2,10 @@
   <div>
     <v-container>
       <v-data-table 
-      :headers=" autoHeaders ? headersAuto : headers" :items="assignments"> 
+      :headers=" autoHeaders ? headersAuto : headers" 
+      :items="assignments"
+      @click:row="clickHandler"
+      class="cursor-pointer"> 
       </v-data-table>
     </v-container>
   </div>
@@ -20,6 +23,10 @@ export default defineComponent({
       default: [], //@todo, customize text for no assignments found
     },
     autoHeaders: Boolean,
+    clickHandler: {
+      type: Function,
+      default:  () => {},
+    },
   },
   data() {
     return {
@@ -74,8 +81,15 @@ export default defineComponent({
   font-weight: bold;
 }
 
+/* set the header row color to same as background
+for minimalist effect */
 ::v-deep .v-data-table-header {
   background-color: var(--v-background-base, #F1F2F4);
+}
+
+/* set mouse cursor to pointer for table rows*/
+::v-deep .cursor-pointer.v-data-table table tbody tr {
+  cursor: pointer;
 }
 
 </style>

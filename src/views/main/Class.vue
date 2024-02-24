@@ -83,7 +83,8 @@
 
       <AssignmentBrowser 
       v-if="assignments !== null"
-      :assignments="assignments">
+      :assignments="assignments"
+      :clickHandler="assingmentClickHandler">
       </AssignmentBrowser>    
 
     </template>
@@ -170,6 +171,41 @@ export default defineComponent({
       
 
     },
+    /**
+     * Performs appropriate actions when the user clicks an entry in 
+     *    the AssignmentBrowser component. Students are navigated to their
+     *    submission for the assingnment, teachers are navigated to the 
+     *    assignment submission page for that assignment.
+     * @param {Object} item a v-data-table item as returned by the click:row event 
+     * of v-data-table component
+     *    {@see https://v2.vuetifyjs.com/en/api/v-data-table/#events}
+     * @param {Object} props props object as passed to item slot of v-data-table row
+     * @param {Object} mouseEvent js MouseEvent
+     */
+    assingmentClickHandler(item, props, mouseEvent) {
+      // console.log(item, props, mouseEvent);
+      
+      // check if row data was given
+      if (!item || isNaN(item.id)) {
+        return;
+      }
+
+      // get id of the assignment table row item clicked
+      let assignmentID = item.id;
+
+      // for students, navigate to the assignment page
+      if (!this.isInstructorOrAdmin) {
+        this.$router.push({
+          path: `/assignment/${assignmentID}`
+        })
+      }
+      // for instructors, navigate to the assignment submissions page
+      else {
+        this.$router.push({
+          path: `/assignment/${assignmentID}`
+        })
+      }
+    }
   },
 },)
 </script>
