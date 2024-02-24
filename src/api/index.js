@@ -20,6 +20,7 @@ const USERDATA = {
   user: {
     id: 0,
     type: 'admin',
+    // type: 'student',
     test_user_val: 'hi',
   },
 };
@@ -36,6 +37,15 @@ store.state.currentUser = USERDATA.user;
 // ${JSON.stringify(store.state)}`);
 
 export default {
+
+  // ************************    General    ************************ //
+
+  isInstructorOrAdmin(user) {
+    if (!user) {
+      return false;
+    }
+    return ['admin', 'instructor'].includes(user.type);
+  },
 
   // ************************ Authentication ************************ //
 
@@ -211,7 +221,37 @@ export default {
       .catch(() => false);
   },
 
+  // ************************ Classes           ************************ //
+
+  async fetchClass(id) {
+    const config = {
+      headers: {
+        Authorization: `Bearer ${JSON.parse(localStorage.getItem('userToken'))}`,
+      },
+    };
+
+    return axios
+      .get(`${baseURL}/api/v1/classes/${id}`, config)
+      .then((response) => response.data.data)
+      .catch(() => false);
+  },
+
   // ************************ Assignments       ************************ //
+
+  async fetchClassAssignments(classID) {
+    // convert the id to an int
+    // sometimes it's a string parsed from the url params
+    classID = parseInt(classID, 10);
+    const config = {
+      headers: {
+        Authorization: `Bearer ${JSON.parse(localStorage.getItem('userToken'))}`,
+      },
+    };
+    return axios
+      .get(`${baseURL}/api/v1/assignments/?classID=${classID}`, config)
+      .then((response) => response.data.data)
+      .catch(() => false);
+  },
 
   async fetchAllAssignments() {
     const config = {

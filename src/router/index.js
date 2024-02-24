@@ -24,9 +24,19 @@ const routes = [
         component: () => import('@/views/main/Register'),
       },
       {
+        path: '/manage',
+        name: 'manage',
+        component: () => import('@/views/Admin/Manage'),
+      },
+      {
         path: '/feed',
         name: 'feed',
         component: () => import('@/views/Learner/Feed'),
+      },
+      {
+        path: '/labs',
+        name: 'labs',
+        component: () => import('@/views/Learner/Courses'),
       },
       {
         path: '/course/:courseId',
@@ -34,7 +44,7 @@ const routes = [
         component: () => import('@/views/main/Course'),
       },
       {
-        path: '/assignment/:assignmentId',
+        path: '/assignment/:assignmentID',
         name: 'assignment',
         component: () => import('@/views/main/Assignment'),
       },
@@ -44,14 +54,9 @@ const routes = [
         component: () => import('@/views/Learner/MyProfile'),
       },
       {
-        path: '/manage',
-        name: 'manage',
-        component: () => import('@/views/Admin/Manage'),
-      },
-      {
-        path: '/labs',
-        name: 'labs',
-        component: () => import('@/views/Learner/Courses'),
+        path: '/class/:classID',
+        name: 'class',
+        component: () => import('@/views/main/Class'),
       },
     ],
   },

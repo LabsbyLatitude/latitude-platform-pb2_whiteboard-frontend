@@ -141,8 +141,6 @@
       </v-container>
     </template>
 
-    <!--Footer-->
-    <Footer></Footer>
   </div>
 </template>
 
@@ -203,8 +201,8 @@ export default defineComponent({
         this.loading = true;
       }
 
-      const { assignmentId } = this.$route.params;
-      this.assignment = await api.fetchSingleAssignment(assignmentId);
+      const { assignmentID } = this.$route.params;
+      this.assignment = await api.fetchSingleAssignment(assignmentID);
 
       this.loading = false;
     },
