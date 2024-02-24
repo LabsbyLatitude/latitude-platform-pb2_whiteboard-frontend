@@ -5,7 +5,20 @@
       :headers=" autoHeaders ? headersAuto : headers" 
       :items="assignments"
       @click:row="clickHandler"
-      class="cursor-pointer"> 
+      class="cursor-pointer"
+      no-data-text="Empty ...">
+      
+      <template v-slot:item.dueDate="{ item }"> 
+        {{ formateDate(item.dueDate) }}
+        <!-- <v-chip v-if="item.dueDate"
+        color="gray"
+        light
+        label
+        outlined
+        >
+        </v-chip> -->
+      </template> 
+
       </v-data-table>
     </v-container>
   </div>
@@ -13,6 +26,7 @@
 
 <script>
 import { defineComponent } from '@vue/runtime-dom';
+import { moment, utc } from 'moment';
 
 export default defineComponent({
   name: 'AssingmentBrowser',
@@ -70,6 +84,12 @@ export default defineComponent({
       return headers;
     },
   },
+  methods: {
+    formateDate(dateString) {
+      return utc(dateString).local().format('lll');
+      // return utc(dateString).format('MMM Do [\n] LT');
+    }
+  }
 });
 </script>
 
