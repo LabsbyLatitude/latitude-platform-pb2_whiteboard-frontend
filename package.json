@@ -14,6 +14,7 @@
     "@vue/composition-api": "^1.7.2",
     "axios": "^0.24.0",
     "core-js": "^3.6.5",
+    "moment": "^2.30.1",
     "register-service-worker": "^1.7.1",
     "unity-webgl": "^3.5.2",
     "vue": "^2.6.11",
