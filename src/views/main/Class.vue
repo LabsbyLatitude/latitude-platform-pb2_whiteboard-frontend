@@ -46,7 +46,7 @@
                     <h3 class="text-h3 font-weight-light"> 
                       Instructor: 
                       <span class="font-weight-black">
-                        # {{ classData.instructorID }} 
+                        # {{ classData.ownerID }} 
                       </span>
                     </h3>
                     <h4 class="font-weight-light">
@@ -134,6 +134,7 @@ export default defineComponent({
     // fetch class and assignments data
     // @todo, check if loading class data failed
     let { id } = await this.getClassData();
+    // console.log(`Class ID ${id}`);
     this.getClassAssignments(id);
 
   },
@@ -141,34 +142,25 @@ export default defineComponent({
     async getClassData() {
       const { classID } = this.$route.params;
       let responseData = await api.fetchClass(classID);
+      // console.log(`response data ${JSON.stringify(responseData)}`);
       if (responseData instanceof Array) {
-        this.classData = responseData;
+        this.classData = responseData[0];
       }
-      //@TODO DELETE THIS
-      this.classData = {
-        id: 1,
-        title: 'My Class Title',
-        instructorID: 1,
-      };
 
       return Promise.resolve(this.classData);
     },
     /**
      * Retrieve assignments data for this class
-     * @param {boolean} load whether to show the loader component while awaiting the assignment data
+     * @param {number} classID the ID of the class
      */
     async getClassAssignments(classID) {
 
-      let responseData = await api.fetchClassAssignments(classID);
-      if (responseData instanceof Array) {
-        this.assignments = responseData;
+      let assignmentData = await api.fetchClassAssignments(classID);
+      if (assignmentData instanceof Array) {
+        this.assignments = assignmentData;
       }
       
-      //@TODO DELETE THIS
-      let assignmentData = await api.fetchAllAssignments();
-      console.log(assignmentData);
-      this.assignments = assignmentData.data;
-      
+      // console.log(assignmentData);
 
     },
     /**

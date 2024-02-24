@@ -230,7 +230,7 @@ export default {
     };
 
     return axios
-      .get(`${baseURL}/api/v1/class/${id}`, config)
+      .get(`${baseURL}/api/v1/classes/${id}`, config)
       .then((response) => response.data.data)
       .catch(() => false);
   },
@@ -238,6 +238,9 @@ export default {
   // ************************ Assignments       ************************ //
 
   async fetchClassAssignments(classID) {
+    // convert the id to an int
+    // sometimes it's a string parsed from the url params
+    classID = parseInt(classID, 10);
     const config = {
       headers: {
         Authorization: `Bearer ${JSON.parse(localStorage.getItem('userToken'))}`,
@@ -245,7 +248,7 @@ export default {
     };
     return axios
       .get(`${baseURL}/api/v1/assignments/?classID=${classID}`, config)
-      .then((response) => response.data)
+      .then((response) => response.data.data)
       .catch(() => false);
   },
 
