@@ -20,6 +20,7 @@ const USERDATA = {
   user: {
     id: 0,
     type: 'admin',
+    // type: 'student',
     test_user_val: 'hi',
   },
 };

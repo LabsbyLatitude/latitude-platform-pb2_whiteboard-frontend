@@ -78,14 +78,39 @@
         <v-tab key="0" v-if="isInstructorOrAdmin">Scheduled</v-tab>
         <v-tab key="1">Assignments</v-tab>
         <v-tab key="2" v-if="!isInstructorOrAdmin">Completed</v-tab>
+        <!-- hide this until grading is implemented -->
+        <!-- could also bin closed assignments here -->
         <v-tab key="3" v-if="isInstructorOrAdmin">Grades</v-tab>
       </v-tabs>
 
-      <AssignmentBrowser 
+      <v-tabs-items v-model="currentTab"
       v-if="assignments !== null"
-      :assignments="assignments"
-      :clickHandler="assingmentClickHandler">
-      </AssignmentBrowser>    
+      >
+      <!-- Scheduled Assignments -->
+        <v-tab-item :value="isInstructorOrAdmin ? 0 : -1">
+          <AssignmentBrowser
+          :assignments="scheduledAssignments"
+          :clickHandler="assingmentClickHandler">
+          </AssignmentBrowser>    
+        </v-tab-item>
+        
+        <!-- Open Assignments -->
+        <v-tab-item :value="isInstructorOrAdmin ? 1 : 0">
+          <AssignmentBrowser
+          :assignments="openAssignments"
+          :clickHandler="assingmentClickHandler">
+          </AssignmentBrowser>    
+        </v-tab-item>
+
+        <!-- Closed Assignments -->
+        <v-tab-item :value="isInstructorOrAdmin ? 2 : 1">
+          <AssignmentBrowser
+          :assignments="closedAssignments"
+          :clickHandler="assingmentClickHandler">
+          </AssignmentBrowser>              
+        </v-tab-item>
+      </v-tabs-items>
+
 
     </template>
   </div>
@@ -117,6 +142,70 @@ export default defineComponent({
   computed: {
     isInstructorOrAdmin() {
       return api.isInstructorOrAdmin(this.user);
+    },
+    /**
+     * return assignments with an open date in the future
+     */
+    scheduledAssignments() {
+      return this.assignments.filter((assignment) => {
+        let scheduled;
+        let now = Date.now();
+        
+        // if no open date, then this assignment is scheduled
+        if (!assignment.openDate) {
+          scheduled = true
+        } else {
+          let openDate = new Date(assignment.openDate);
+          scheduled = openDate > now; 
+        }
+        
+        return scheduled;
+      });
+    },
+    /**
+     * return assignments with an open date in the past
+     * and a due date in the future
+     */
+    openAssignments() {
+      return this.assignments.filter((assignment) => {
+        let closed, scheduled;
+        let now = Date.now();
+        // if no due date, then this assignment isn't closed
+        if (!assignment.dueDate) {
+          closed = false;
+        } else {
+          let dueDate = new Date(assignment.dueDate);
+          closed = dueDate < now;
+        }
+
+        // if no open date, then this assignment is scheduled
+        if (!assignment.openDate) {
+          scheduled = true
+        } else {
+          let openDate = new Date(assignment.openDate);
+          scheduled = openDate > now; 
+        }
+        
+        return !scheduled && !closed;
+      });
+    },
+    /**
+     * return assignments with a due date in the past
+     */
+    closedAssignments() {
+      return this.assignments.filter((assignment) => {
+        let closed;
+        let now = Date.now();
+        // if no due date, then this assignment isn't closed
+        if (!assignment.dueDate) {
+          closed = false;
+        } else {
+          let dueDate = new Date(assignment.dueDate);
+          closed = dueDate < now;
+        }
+
+        return closed;
+      });
     }
   },
   async created() {
@@ -202,7 +291,7 @@ export default defineComponent({
 },)
 </script>
 
-<style>
+<style scoped>
 
 .header-section {
   background-color: #3f3d56;
@@ -223,5 +312,9 @@ export default defineComponent({
   .new-container {
     max-width: 1440px;
   }
+}
+
+::v-deep .theme--light.v-tabs-items {
+  background-color: var(--v-background-base, #F1F2F4);
 }
 </style>
