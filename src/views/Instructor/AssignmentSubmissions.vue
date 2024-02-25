@@ -1,7 +1,7 @@
 <template>
   
   <div>
-    <template v-if="!classData">
+    <template v-if="!assignmentSubmissions">
       <Loading></Loading>
     </template>
     
@@ -30,15 +30,15 @@
                 <v-row 
                 class="ga-10 mb-3"
                 justify="center" justify-sm="start">
-                  <!-- Class Title -->
+                  <!-- Assignment Title -->
                   <v-col
                   cols="auto">
                     <h1 class="text-h1 font-weight-medium pt-xs-0 pt-sm-5">
-                      {{ classData.title }}
+                      {{ assignment.name }}
                     </h1>
                   </v-col>
                   
-                  <!-- Class Attribution -->
+                  <!-- Assignment Attribution -->
                   <v-col 
                   style="flex-direction: column;"
                   cols="auto"
@@ -46,7 +46,7 @@
                     <h3 class="text-h3 font-weight-light"> 
                       Instructor: 
                       <span class="font-weight-black">
-                        # {{ classData.ownerID }} 
+                        # {{ assignment.instructorID }} 
                       </span>
                     </h3>
                     <h4 class="font-weight-light">
@@ -55,9 +55,20 @@
                   </v-col>
                 </v-row>
 
-                <!-- Class Desc. -->
+                <!-- assignment Desc. -->
                 <v-row>
-                  
+                  <v-col>
+                    <div
+                    :class="{
+                      'text-h4': $vuetify.breakpoint.smAndUp,
+                      'text-center': $vuetify.breakpoint.smAndDown,
+                      'text-subtitle-1': $vuetify.breakpoint.xs,
+                    }"
+                    class="font-weight-light mb-3 mt-6"
+                    >
+                      Due: {{ assignment.dueDate ? new Date(assignment.dueDate).toLocaleString() : 'No Due Date' }}
+                    </div>
+                  </v-col>
                 </v-row>
               </v-col>
             </v-row>
@@ -67,7 +78,7 @@
         </v-container>
       </header>
 
-      <!-- Assignment Sections -->
+      <!-- Assignment Submission Sections -->
       <v-tabs
         centered
         dark
@@ -126,7 +137,7 @@ import classHeaderImage1 from '@/assets/course_1.svg'
 import classHeaderImage2 from '@/assets/course_2.svg'
 
 export default defineComponent({
-  name: 'ClassAssignments',
+  name: 'AssignmentSubmissions',
   components: {
     Loading,
     AssignmentBrowser
@@ -138,6 +149,15 @@ export default defineComponent({
       assignments: [],
       headerImage: null,
       currentTab: 0,
+      loading: true,
+      assignment: null,
+      course: null,
+      assignmentSubmissions: null,
+      /** 
+       * Whether the user is the owner of the assignment associated with the 
+       * submissions
+       */
+      ownsAssignment: false,
     }
   },
   computed: {
@@ -218,41 +238,52 @@ export default defineComponent({
       classHeaderImage2 : classHeaderImage1;
 
     // set default tab to assignments for teachers
-    // @todo, doesn't work
     this.currentTab = this.isInstructorOrAdmin ? 1 : 0;
 
-    // fetch class and assignments data
-    // @todo, check if loading class data failed
-    let { id } = await this.getClassData();
-    // console.log(`Class ID ${id}`);
-    this.getClassAssignments(id);
+    // get assignment id from url params
+    const { assignmentID } = this.$route.params;
 
+    // fetch the assignment info,
+    // @todo, check if loading assignment data failed
+    this.assignment = await this.getAssignment(assignmentID, true);
+    // fetch all assignment submissions
+    this.assignmentSubmissions = await this.getAssignmentSubmissions(assignmentID);
+    // fetch the related course
+    this.course = await this.getCourse(this.assignment.courseID);
+    // fetch the related classroom
+    this.classData = await this.getClassData(this.assignment.classID);
   },
   methods: {
-    async getClassData() {
-      const { classID } = this.$route.params;
+    /**
+     * retrieve the data for a classroom instance
+     * @param {number} classID ID of the class
+     * @returns a promise that resolves to the classroom data object
+     */
+    async getClassData(classID) {
       let responseData = await api.fetchClass(classID);
       // console.log(`response data ${JSON.stringify(responseData)}`);
+
+      let classData;
       if (responseData instanceof Array) {
-        this.classData = responseData[0];
+        classData = responseData[0];
       }
 
-      return Promise.resolve(this.classData);
+      return Promise.resolve(classData);
     },
-    /**
-     * Retrieve assignments data for this class
-     * @param {number} classID the ID of the class
-     */
-    async getClassAssignments(classID) {
+    // /**
+    //  * Retrieve assignments data for this class
+    //  * @param {number} classID the ID of the class
+    //  */
+    // async getClassAssignments(classID) {
 
-      let assignmentData = await api.fetchClassAssignments(classID);
-      if (assignmentData instanceof Array) {
-        this.assignments = assignmentData;
-      }
+    //   let assignmentData = await api.fetchClassAssignments(classID);
+    //   if (assignmentData instanceof Array) {
+    //     this.assignments = assignmentData;
+    //   }
       
-      // console.log(assignmentData);
+    //   // console.log(assignmentData);
 
-    },
+    // },
     /**
      * Performs appropriate actions when the user clicks an entry in 
      *    the AssignmentBrowser component. Students are navigated to their
@@ -287,7 +318,57 @@ export default defineComponent({
           path: `/assignment/${assignmentID}`
         })
       }
-    }
+    },
+    /**
+     * Retrieve assignment data for a specified ID 
+     * @param {number} assignmentID ID of the assignment to fetch 
+     * @param {boolean} load whether to show the loader component while awaiting the assignment data
+     * @returns a promise that resolves to the assignment object
+     */
+     async getAssignment(assignmentID, load = false) {
+      // this.currentTab = 0;
+      if (load) {
+        this.loading = true;
+      }
+
+      let assignment = await api.fetchSingleAssignment(assignmentID);
+
+      // check if user owns assignment
+      if (this.user.id === assignment.instructorID) {
+        this.ownsAssignment = true;
+       }
+      
+      this.loading = false;
+      
+      return Promise.resolve(assignment);
+    },
+    /**
+     * Retrieve course data for a specified ID and update the {@link ownsAssignment}
+     * property accordingly
+     * @param {number} courseID ID of the course 
+     * @param {boolean} load whether to show the loader component while awaiting the course data
+     */
+    async getCourse(courseID, load = false) {
+      this.currentTab = 0;
+      if (load) {
+        this.loading = true;
+      }
+
+      let course = await api.fetchSingleCourse(courseID);
+
+      this.loading = false;
+      
+      return Promise.resolve(course);
+    },
+    /**
+     * fetch all submissions for this assignment
+     * @param {number} assignmentID ID of the related assignment 
+     */
+    async getAssignmentSubmissions(assignmentID) {
+      // request assignment submissions for the assignmentID
+      let submissions = await api.fetchAllAssignmentSubmission(assignmentID);
+      return Promise.resolve(submissions);
+    },
   },
 },)
 </script>

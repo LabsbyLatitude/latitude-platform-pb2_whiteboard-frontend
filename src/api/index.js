@@ -346,6 +346,23 @@ export default {
       .then((response) => response.data.data[0])
       .catch(() => false);
   },
+  /**
+   * Fetch all submissions for an assignment
+   * @param {number} assignmentID id of the related assignment
+   * @returns promise that resolves to an array of assignment submissions
+   */
+  async fetchAllAssignmentSubmission(assignmentID) {
+    const config = {
+      headers: {
+        Authorization: `Bearer ${JSON.parse(localStorage.getItem('userToken'))}`,
+      },
+    };
+
+    return axios
+      .get(`${baseURL}/api/v1/assignments/${assignmentID}/submissions`, config)
+      .then((response) => response.data.data)
+      .catch(() => false);
+  },
 
   async updateAssignmentSubmission(submissionEdits) {
     const config = {

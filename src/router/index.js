@@ -58,6 +58,11 @@ const routes = [
         name: 'class',
         component: () => import('@/views/main/Class'),
       },
+      {
+        path: '/assignment/:assignmentID/submissions',
+        name: 'assignment-submissions',
+        component: () => import('@/views/Instructor/AssignmentSubmissions'),
+      },
     ],
   },
   {
