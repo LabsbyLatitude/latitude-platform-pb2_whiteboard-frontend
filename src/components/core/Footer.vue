@@ -23,7 +23,7 @@
 
         <v-col cols="12" md="auto">
           <div class="text-body-1 font-weight-light pt-6 pt-md-0 text-center">
-            version 0.1.1
+            version {{version}}
           </div>
         </v-col>
 
@@ -34,11 +34,14 @@
 </template>
 
 <script>
+import packageConfig from '../../../package.json';
+
 export default {
   name: 'DashboardCoreFooter',
 
   data: () => ({
     links: [],
+    version: packageConfig.version
   }),
 };
 </script>

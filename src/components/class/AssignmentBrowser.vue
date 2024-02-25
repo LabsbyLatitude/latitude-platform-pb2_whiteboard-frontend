@@ -9,8 +9,8 @@
       no-data-text="Empty ...">
       
       <template v-slot:item.dueDate="{ item }"> 
-        {{ formateDate(item.dueDate) }}
-        <!-- <v-chip v-if="item.dueDate"
+        {{ item.dueDate ? formateDate(item.dueDate) : '' }}
+        <!-- <v-chip 
         color="gray"
         light
         label
