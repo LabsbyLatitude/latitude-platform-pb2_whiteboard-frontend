@@ -7,9 +7,16 @@
       @click:row="clickHandler"
       class="cursor-pointer"
       no-data-text="Empty ...">
+
+      <!-- for each specified formatter, create a slot for the corresponding table
+        item column (e.g., dueDate, submitted) and call the formatter function on the value  -->
+      <template v-for="formatterName in formatterNames" v-slot:[`item.${formatterName}`]="{ item }"> 
+        <!-- might be worth leaving the undefined check to the formatter function -->
+        {{ item[formatterName] !== undefined ? formatters[formatterName](item[formatterName]) : '' }}
+      </template> 
       
       <template v-slot:item.dueDate="{ item }"> 
-        {{ item.dueDate ? formateDate(item.dueDate) : '' }}
+        {{ item.dueDate ? formatDate(item.dueDate) : '' }}
         <!-- <v-chip 
         color="gray"
         light
@@ -26,10 +33,11 @@
 
 <script>
 import { defineComponent } from '@vue/runtime-dom';
+
 import { moment, utc } from 'moment';
 
 export default defineComponent({
-  name: 'AssingmentBrowser',
+  name: 'AssignmentBrowser',
   props: {
     assignments: {
       type: Array,
@@ -41,10 +49,14 @@ export default defineComponent({
       type: Function,
       default:  () => {},
     },
-  },
-  data() {
-    return {
-      headers: [
+    /**
+       * A list of headers for the submissions table. 
+       * This should be formatted according to the v-data-table-headers
+       * prop formatting
+       */
+    headers: {
+      type: Array,
+      default: () => [
         {
           text: 'Assignment Name',
           align: 'center',
@@ -59,7 +71,21 @@ export default defineComponent({
           align: 'center',
           value: 'dueDate',
         },
-      ],
+      ]
+    },
+    /**
+     * An object mapping table header ids/keys to functions for
+     * formatting their corresponding value for each row
+     * entry
+     */
+    formatters: {
+      type: Object,
+      default: () => {},
+      required: false
+    }
+  },
+  data() {
+    return {
     };
   },
   computed: {
@@ -84,10 +110,33 @@ export default defineComponent({
       return headers;
     },
   },
+  created () {
+    // console.log(`Formatter Keys: ${}`)
+  },
+  computed: {
+    /**
+     * @returns an array of names for each formatter entry in {@link formatters}
+     */
+    formatterNames() {
+      return Object.keys(this.formatters);
+    }
+  },
   methods: {
-    formateDate(dateString) {
-      return utc(dateString).local().format('lll');
-      // return utc(dateString).format('MMM Do [\n] LT');
+    /**
+     * Generate a local time formatted date string from an ISO
+     * UTC datatime string
+     * - example: Dec 24, 2023 12:00 AM
+     * @param {object} dateString ISO UTC formatted datetime string
+     */
+    formatDate(dateString) {
+      if (dateString === '') {
+        return '';
+      } else if (dateString === null || dateString === undefined) {
+        return 'no date';
+      } else {
+        return utc(dateString).local().format('lll');
+        // return utc(dateString).format('MMM Do [\n] LT');
+      }
     }
   }
 });
