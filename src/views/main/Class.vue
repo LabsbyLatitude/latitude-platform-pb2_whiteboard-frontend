@@ -284,7 +284,7 @@ export default defineComponent({
       // for instructors, navigate to the assignment submissions page
       else {
         this.$router.push({
-          path: `/assignment/${assignmentID}`
+          path: `/assignment/${assignmentID}/submissions`
         })
       }
     }
