@@ -1,7 +1,7 @@
 <template>
   
   <div>
-    <template v-if="!assignmentSubmissions">
+    <template v-if="!initialized">
       <Loading></Loading>
     </template>
     
@@ -86,42 +86,37 @@
         v-model="currentTab"
         :fixed-tabs="!$vuetify.breakpoint.xs"
       >
-        <v-tab key="0" v-if="isInstructorOrAdmin">Scheduled</v-tab>
-        <v-tab key="1">Assignments</v-tab>
-        <v-tab key="2" v-if="!isInstructorOrAdmin">Completed</v-tab>
-        <!-- hide this until grading is implemented -->
-        <!-- could also bin closed assignments here -->
-        <v-tab key="3" v-if="isInstructorOrAdmin">Grades</v-tab>
+        <v-tab key="0">Submissions</v-tab>
+        <!-- This could be a tab to view student responses
+          aggregated by individual activity in the course instance 
+          of this assignment -->
+        <v-tab key="1">Activities</v-tab>
       </v-tabs>
 
       <v-tabs-items v-model="currentTab"
-      v-if="assignments !== null"
       >
-      <!-- Scheduled Assignments -->
-        <v-tab-item :value="isInstructorOrAdmin ? 0 : -1">
+      <!-- Submissions Assignments -->
+        <v-tab-item :value="0">
           <AssignmentBrowser
-          :assignments="scheduledAssignments"
+          ref="submissionsBrowser"
+          :assignments="assignmentSubmissions"
+          :headers="submissionsTableHeaders"
+          :formatters="submissionTableFormatters"
           :clickHandler="assingmentClickHandler">
-          </AssignmentBrowser>    
+          </AssignmentBrowser>   
         </v-tab-item>
         
-        <!-- Open Assignments -->
-        <v-tab-item :value="isInstructorOrAdmin ? 1 : 0">
+        <!-- Activities -->
+        <v-tab-item :value="1"> 
+          <h1> Hello World, Tab 1</h1>   
           <AssignmentBrowser
-          :assignments="openAssignments"
-          :clickHandler="assingmentClickHandler">
-          </AssignmentBrowser>    
+          :assignments="[]"
+          :clickHandler="assingmentClickHandler"
+          :autoHeaders="true">
+          </AssignmentBrowser> 
         </v-tab-item>
 
-        <!-- Closed Assignments -->
-        <v-tab-item :value="isInstructorOrAdmin ? 2 : 1">
-          <AssignmentBrowser
-          :assignments="closedAssignments"
-          :clickHandler="assingmentClickHandler">
-          </AssignmentBrowser>              
-        </v-tab-item>
       </v-tabs-items>
-
 
     </template>
   </div>
@@ -130,12 +125,20 @@
 <script>
 import { defineComponent } from '@vue/runtime-dom';
 
+import {utc } from 'moment';
+
+
 import Loading from '@/components/Loading.vue';
 import AssignmentBrowser from '@/components/class/AssignmentBrowser';
 import api from '@/api'
 import classHeaderImage1 from '@/assets/course_1.svg'
 import classHeaderImage2 from '@/assets/course_2.svg'
 
+/**
+ * @todo check if the user an instructor or owns the assignment.
+ * if not, navigate back and set a toast message noting unauthorized
+ * access.
+ */
 export default defineComponent({
   name: 'AssignmentSubmissions',
   components: {
@@ -158,9 +161,61 @@ export default defineComponent({
        * submissions
        */
       ownsAssignment: false,
+      /**
+       * A list of headers for the submissions table. 
+       * This should be formatted according to the v-data-table-headers
+       * prop formatting
+       */
+      submissionsTableHeaders: [
+        {
+          text: 'Student',
+          align: 'center',
+          value: 'userID',
+        },
+        {
+          text: 'Progress',
+          align: 'center',
+          value: 'submitted',
+        },
+        {
+          text: 'Date Submitted',
+          align: 'center',
+          value: 'timeSubmitted',
+        },
+        {
+          text: 'Grade',
+          align: 'center',
+          value: 'grade',
+        },
+      ],
+      /**
+       * An object of formatter functions for the entries in
+       *  the submissions table. {@see AssignmentBrowser.formatters}
+       */
+      submissionTableFormatters: {
+        submitted: (val) => val ? 'Submitted' : 'Un-Submitted',
+        /**
+         * use the date formatter defined in the assignment browser component
+         * to format the time submitted value
+         * @todo, this doesn't work
+         */
+        timeSubmitted: (val) => {
+          return  this.submissionsBrowser ?
+          this.submissionsBrowser.formatDate(val) : this.formatDate(val);
+        },
+        userID: (val) => {
+          return val === this.user.id ? 'You' : `Student ${val}`;
+        },
+      }
     }
   },
   computed: {
+    submissionsBrowser() {
+      return this.$refs.submissionsBrowser
+    },
+    initialized() {
+      return this.assignment && this.course && this.classData && this.assignmentSubmissions;
+    },
     isInstructorOrAdmin() {
       return api.isInstructorOrAdmin(this.user);
     },
@@ -366,9 +421,27 @@ export default defineComponent({
      */
     async getAssignmentSubmissions(assignmentID) {
       // request assignment submissions for the assignmentID
-      let submissions = await api.fetchAllAssignmentSubmission(assignmentID);
+      let submissions = await api.fetchAllAssignmentSubmissions(assignmentID);
       return Promise.resolve(submissions);
     },
+    //////////// Formatters /////////////
+    
+    /**
+     * Generate a local time formatted date string from an ISO
+     * UTC datatime string
+     * - example: Dec 24, 2023 12:00 AM
+     * @param {object} dateString ISO UTC formatted datetime string
+     */
+     formatDate(dateString) {
+       if (dateString === '' ||
+         dateString === null ||
+         dateString === undefined) {
+        return '';
+      } else {
+        return utc(dateString).local().format('lll');
+        // return utc(dateString).format('MMM Do [\n] LT');
+      }
+    }
   },
 },)
 </script>

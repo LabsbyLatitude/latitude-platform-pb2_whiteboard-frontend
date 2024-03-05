@@ -351,7 +351,7 @@ export default {
    * @param {number} assignmentID id of the related assignment
    * @returns promise that resolves to an array of assignment submissions
    */
-  async fetchAllAssignmentSubmission(assignmentID) {
+  async fetchAllAssignmentSubmissions(assignmentID) {
     const config = {
       headers: {
         Authorization: `Bearer ${JSON.parse(localStorage.getItem('userToken'))}`,
