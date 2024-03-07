@@ -64,17 +64,38 @@
                   {{ course.difficulty }}
                 </v-chip>
               </div> -->
-              <!-- Assignment Description -->
-              <div
-                :class="{
-                  'text-h4': $vuetify.breakpoint.smAndUp,
-                  'text-center': $vuetify.breakpoint.smAndDown,
-                  'text-subtitle-1': $vuetify.breakpoint.xs,
-                }"
-                class="font-weight-light mb-3 mt-6"
-              >
-                Due: {{ assignment.dueDate ? new Date(assignment.dueDate).toLocaleString() : 'No Due Date' }}
-              </div>
+              
+              <!-- Dates -->
+              <v-row>
+                <!-- Assignment Due Date -->
+                <v-col cols="12" md="auto">
+                    <div
+                    :class="{
+                      'text-h4': $vuetify.breakpoint.smAndUp,
+                      'text-center': $vuetify.breakpoint.smAndDown,
+                      'text-subtitle-1': $vuetify.breakpoint.xs,
+                    }"
+                    class="font-weight-light mb-3 mt-6"
+                  >
+                    Due: {{ assignment.dueDate ? new Date(assignment.dueDate).toLocaleString() : 'No Due Date' }}
+                  </div>
+                </v-col>
+                <!-- Assignment Submission Date -->
+
+                <v-col v-if=" assignmentSubmission && assignmentSubmission.submitted " cols="12" md="auto">
+                    <div
+                    :class="{
+                      'text-h4': $vuetify.breakpoint.smAndUp,
+                      'text-center': $vuetify.breakpoint.smAndDown,
+                      'text-subtitle-1': $vuetify.breakpoint.xs,
+                    }"
+                    class="font-weight-light mb-3 mt-6"
+                  >
+                    Submitted: {{new Date(assignmentSubmission.timeSubmitted).toLocaleString()}}
+                  </div>
+                </v-col>
+              </v-row>
+
             </v-col>
           </v-row>
         </v-container>
@@ -116,7 +137,7 @@
       <!-- "Content" Tab Container -->
       <v-container class="new-container py-8">
         <template v-if="currentTab == 0">
-          <div class="text-h1 text-center">Course Content</div>
+          <div class="text-h1 text-center">Assignment Activities</div>
           <CourseContent
             @refetch="getCourse(false)"
             :activities="course.activities"
@@ -163,6 +184,16 @@ export default defineComponent({
     CreateActivity,
     CourseThreads,
     AssignCourse,
+  },
+  props: {
+    /**
+     * ID of a user account whose submission data to fetch for this assignment
+     * component
+     */
+    userID: {
+      type: Number,
+      required: false
+    }
   },
   data() {
     return {
@@ -287,7 +318,35 @@ export default defineComponent({
   async created() {
 
     // get user info
-    this.user = JSON.parse(localStorage.getItem('userData'));
+
+    
+    /**
+     * check if user ID is specified as a prop, then fetch user info
+     * @todo, replace  this  with a query for the actual user data from the backend
+     */
+    if (this.userID !== undefined) {
+      this.user = {
+        id: this.userID,
+        type: 'student',
+      }
+    }
+    /**
+     * check if user ID is specified as a query param, then fetch user info
+     * @todo, replace  this  with a query for the actual user data from the backend
+     */
+    else if (typeof parseInt(this.$route.query.userID, 10) == 'number') {
+      this.user = {
+        id: parseInt(this.$route.query.userID, 10),
+        type: 'student',
+      }
+    } 
+    /**
+     * fetch user info from local storage of the  current browser
+     * @todo, replace  this  with a query for the actual user data from the backend
+     */
+    else {
+      this.user = JSON.parse(localStorage.getItem('userData'));
+    }
 
     // fetch the assignment info,
     // the related course,

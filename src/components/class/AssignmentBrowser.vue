@@ -127,6 +127,8 @@ export default defineComponent({
      * UTC datatime string
      * - example: Dec 24, 2023 12:00 AM
      * @param {object} dateString ISO UTC formatted datetime string
+     * 
+     * @todo, might be worth relocating these to separate module for easier re-use
      */
     formatDate(dateString) {
       if (dateString === '') {
