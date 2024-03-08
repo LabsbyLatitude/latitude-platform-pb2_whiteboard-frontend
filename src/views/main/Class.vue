@@ -126,6 +126,7 @@ import classHeaderImage1 from '@/assets/course_1.svg'
 import classHeaderImage2 from '@/assets/course_2.svg'
 
 export default defineComponent({
+  name: 'ClassAssignments',
   components: {
     Loading,
     AssignmentBrowser
@@ -283,7 +284,7 @@ export default defineComponent({
       // for instructors, navigate to the assignment submissions page
       else {
         this.$router.push({
-          path: `/assignment/${assignmentID}`
+          path: `/assignment/${assignmentID}/submissions`
         })
       }
     }
