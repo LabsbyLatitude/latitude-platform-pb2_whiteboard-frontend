@@ -47,14 +47,26 @@
                   </h2>
                 </v-col>
                 <!-- Assignment Attribution -->
-                <v-col cols="auto" class="align-bottom">
-                  <div class="text-h3 font-weight-light mb-3">
-                    Class
-                    <span class="text-h3 white--text font-weight-black mb-3">{{
-                      assignment.classID
-                    }}</span>
-                  </div>
-                </v-col>
+                <v-col 
+                  style="flex-direction: column;"
+                  cols="auto"
+                  class="align-bottom">
+                    <h3 v-if="user.type !== 'student'"
+                    class="text-h3 font-weight-light "> 
+                      <span class="grey--text text--lighten-1">
+                        User: 
+                      </span>
+                      <span class="font-weight-black">
+                        # {{ user.id }} 
+                      </span>
+                    </h3>
+                    <h4 class="font-weight-light">
+                      <span class="grey--text text--lighten-1">
+                      Class Id: # 
+                      </span>
+                      {{ assignment.classID }}
+                    </h4>
+                  </v-col>
               </v-row>
 
               <!-- Assignment Difficulty -->
@@ -329,7 +341,7 @@ export default defineComponent({
     if (this.userID !== undefined) {
       this.user = {
         id: this.userID,
-        type: 'student',
+        type: 'instructor',
       }
       // console.log(`assignment submission user ID received as a prop: ${this.userID}`)
     }
@@ -340,7 +352,7 @@ export default defineComponent({
     else if ( !isNaN(parseInt(this.$route.query.userID, 10))) {
       this.user = {
         id: parseInt(this.$route.query.userID, 10),
-        type: 'student',
+        type: 'instructor',
       }
       // console.log(`assignment submission user ID received as query param: ${this.user.id}`)
     } 
