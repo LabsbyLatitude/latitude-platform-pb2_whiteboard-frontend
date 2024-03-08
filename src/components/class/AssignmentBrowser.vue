@@ -44,7 +44,10 @@ export default defineComponent({
       required: true,
       default: [], //@todo, customize text for no assignments found
     },
-    autoHeaders: Boolean,
+    autoHeaders: {
+      type: Boolean,
+      default: () => false
+    },
     clickHandler: {
       type: Function,
       default:  () => {},
@@ -118,7 +121,7 @@ export default defineComponent({
      * @returns an array of names for each formatter entry in {@link formatters}
      */
     formatterNames() {
-      return Object.keys(this.formatters);
+      return this.formatters ? Object.keys(this.formatters) : [];
     }
   },
   methods: {
