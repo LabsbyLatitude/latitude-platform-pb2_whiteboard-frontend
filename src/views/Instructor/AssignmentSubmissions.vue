@@ -93,6 +93,25 @@
         <v-tab key="1">Activities</v-tab>
       </v-tabs>
 
+      <!-- Toolbar -->
+      <!-- @TODO, use v-toolbar element -->
+      <v-container class="mb-6">
+        <v-row align="center" justify="end">
+          <v-col cols="auto">
+            
+            <!-- Navigate to instructor Submission Button -->
+            <v-btn 
+            @click="navigateToUserSubmission"
+            class="ma-0" 
+            color="#b8860b"
+            >
+              <v-icon left> mdi-account-eye </v-icon>
+              View as Student
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-container>
+
       <v-tabs-items v-model="currentTab"
       >
       <!-- Submissions Assignments -->
@@ -193,7 +212,7 @@ export default defineComponent({
        *  the submissions table. {@see AssignmentBrowser.formatters}
        */
       submissionTableFormatters: {
-        submitted: (val) => val ? 'Submitted' : 'Un-Submitted',
+        submitted: (val) => val ? `Submitted` : 'Un-Submitted',
         /**
          * use the date formatter defined in the assignment browser component
          * to format the time submitted value
@@ -288,7 +307,7 @@ export default defineComponent({
     // get user info from local storage
     this.user = JSON.parse(localStorage.getItem('userData'));
 
-    // set class header image
+    // set header image
     this.headerImage = this.user.type === 'instructor' || this.user.type === 'admin' ?
       classHeaderImage2 : classHeaderImage1;
 
@@ -341,9 +360,8 @@ export default defineComponent({
     // },
     /**
      * Performs appropriate actions when the user clicks an entry in 
-     *    the AssignmentBrowser component. Students are navigated to their
-     *    submission for the assingnment, teachers are navigated to the 
-     *    assignment submission page for that assignment.
+     *    the AssignmentBrowser component. Teachers are navigated to the 
+     *    assignment submission page for the student submission item clicked
      * @param {Object} item a v-data-table item as returned by the click:row event 
      * of v-data-table component
      *    {@see https://v2.vuetifyjs.com/en/api/v-data-table/#events}
@@ -354,25 +372,24 @@ export default defineComponent({
       // console.log(item, props, mouseEvent);
       
       // check if row data was given
-      if (!item || isNaN(item.id)) {
+      if (!item || isNaN(item.userID)) {
         return;
       }
 
-      // get id of the assignment table row item clicked
-      let assignmentID = item.id;
+      // get id of the user for the submission item clicked
+      let userID = item.userID;
 
-      // for students, navigate to the assignment page
-      if (!this.isInstructorOrAdmin) {
-        this.$router.push({
-          path: `/assignment/${assignmentID}`
+      // navigate to the submission page of the user for this assignment
+      this.navigateToUserSubmission(userID)
+    },
+    /**
+     * Navigate to the assignment submission of a specified user ID.
+     * @param {number} userID user id of user whose submission to navigate to
+     */
+    navigateToUserSubmission(userID) {
+      this.$router.push({
+          path: `/assignment/${this.assignment.id}/?userID=${userID}`
         })
-      }
-      // for instructors, navigate to the assignment submissions page
-      else {
-        this.$router.push({
-          path: `/assignment/${assignmentID}`
-        })
-      }
     },
     /**
      * Retrieve assignment data for a specified ID 
