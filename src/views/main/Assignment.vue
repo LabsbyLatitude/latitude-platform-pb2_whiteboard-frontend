@@ -260,7 +260,7 @@ export default defineComponent({
      * for this assignment, creating one if none exists
      */
     async getAssignmentSubmission() {
-      // request assingment submission for current user
+      // request assignment submission for current user
       await api.fetchSingleAssignmentSubmission(this.assignment.id, this.user.id)
         .then((res) => {
           // check if server responded with a valid submission
@@ -317,9 +317,8 @@ export default defineComponent({
   },
   async created() {
 
-    // get user info
+    /////// get user info
 
-    
     /**
      * check if user ID is specified as a prop, then fetch user info
      * @todo, replace  this  with a query for the actual user data from the backend
@@ -329,16 +328,18 @@ export default defineComponent({
         id: this.userID,
         type: 'student',
       }
+      // console.log(`assignment submission user ID received as a prop: ${this.userID}`)
     }
     /**
      * check if user ID is specified as a query param, then fetch user info
      * @todo, replace  this  with a query for the actual user data from the backend
      */
-    else if (typeof parseInt(this.$route.query.userID, 10) == 'number') {
+    else if ( !isNaN(parseInt(this.$route.query.userID, 10))) {
       this.user = {
         id: parseInt(this.$route.query.userID, 10),
         type: 'student',
       }
+      // console.log(`assignment submission user ID received as query param: ${this.user.id}`)
     } 
     /**
      * fetch user info from local storage of the  current browser
@@ -346,7 +347,10 @@ export default defineComponent({
      */
     else {
       this.user = JSON.parse(localStorage.getItem('userData'));
+      // console.log(`assignment submission user ID being read from local storage user data: ${this.user}`)
     }
+
+    //////// get submission assignment info
 
     // fetch the assignment info,
     // the related course,
