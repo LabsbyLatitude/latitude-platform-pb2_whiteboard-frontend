@@ -33,6 +33,9 @@
                   <!-- Class Title -->
                   <v-col
                   cols="auto">
+                    <h3 class="text-h3 font-weight-black mb-xs-0 mb-sm-n4 text-uppercase grey--text text--lighten-1"> 
+                        Class
+                    </h3>
                     <h1 class="text-h1 font-weight-medium pt-xs-0 pt-sm-5">
                       {{ classData.title }}
                     </h1>

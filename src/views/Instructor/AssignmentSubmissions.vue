@@ -33,6 +33,9 @@
                   <!-- Assignment Title -->
                   <v-col
                   cols="auto">
+                    <h3 class="text-h3 font-weight-black mb-xs-0 mb-sm-n4 text-uppercase grey--text text--lighten-1"> 
+                      SUBMISSIONS
+                    </h3>
                     <h1 class="text-h1 font-weight-medium pt-xs-0 pt-sm-5">
                       {{ assignment.name }}
                     </h1>
@@ -43,14 +46,19 @@
                   style="flex-direction: column;"
                   cols="auto"
                   class="align-bottom">
-                    <h3 class="text-h3 font-weight-light"> 
-                      Instructor: 
+                    <h3 class="text-h3 font-weight-light "> 
+                      <span class="grey--text text--lighten-1">
+                        Instructor: 
+                      </span>
                       <span class="font-weight-black">
                         # {{ assignment.instructorID }} 
                       </span>
                     </h3>
                     <h4 class="font-weight-light">
-                      Class Id: # {{ classData.id }}
+                      <span class="grey--text text--lighten-1">
+                      Class Id: # 
+                      </span>
+                      {{ classData.id }}
                     </h4>
                   </v-col>
                 </v-row>

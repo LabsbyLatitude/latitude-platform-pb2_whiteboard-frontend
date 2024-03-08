@@ -33,6 +33,9 @@
                 
                 <!-- Assignment Name -->
                 <v-col cols="auto">
+                  <h3 class="text-h3 font-weight-black mb-xs-0 mb-sm-n4 text-uppercase grey--text text--lighten-1"> 
+                      Assignment
+                  </h3>
                   <h2
                     :class="{
                       'mt-5': $vuetify.breakpoint.smAndUp,
