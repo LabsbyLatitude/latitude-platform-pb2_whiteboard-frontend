@@ -1,74 +1,7 @@
 <template>
   <div>
-
-    <!-- Sidebar Navigation Menu -->
-    <v-navigation-drawer v-model="drawer" app temporary color="topbar">
-      <!-- Sidebar Nav Links for logged-in user -->
-      <template v-if="$store.state.currentUser !== null">
-        <v-list dense nav style="list-style: none" class="mt-3 mb-3 text-center">
-          <!-- Avatar -->
-          <li class="text-center">
-            <v-avatar class="align-self-center" height="100" width="110">
-              <v-icon size="50" color="white">mdi-human-child</v-icon>
-            </v-avatar>
-          </li>          
-          <!-- First Name -->
-          <li class="text-center text-h3 white--text">
-            {{ $store.state.currentUser.firstName }}
-          </li>          
-          <!-- "My Profile" Nav Link, for 'learners' -->
-          <v-list-item
-            class="mt-2"
-            :to="'/myprofile'"
-            v-if="$store.state.currentUser && $store.state.currentUser.type === 'learner'"
-          >
-            <v-list-item-title class="text-subtitle-1 font-weight-light white--text text-center">
-              <v-icon color="white" class="mr-5">mdi-account-details</v-icon> My Profile
-            </v-list-item-title>
-          </v-list-item>
-          <!-- "Manage Users" Nav Link, for 'admins' -->
-          <v-list-item
-            class="mt-2"
-            :to="'/manage'"
-            v-if="$store.state.currentUser && $store.state.currentUser.type === 'admin'"
-          >
-            <v-list-item-title class="text-subtitle-1 font-weight-light white--text text-center">
-              <v-icon color="white" class="mr-5">mdi-cog</v-icon> Manage Users
-            </v-list-item-title>
-          </v-list-item>
-          <!-- "Log out" Nav Link -->
-          <v-list-item @click="logOut" class="mt-2">
-            <v-list-item-title class="text-subtitle-1 font-weight-light white--text text-center">
-              <v-icon color="white" class="mr-5">mdi-login-variant</v-icon> Log out
-            </v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </template>
-
-      <!-- Sidebar Nav Links for non-logged-in user -->
-      <v-list expand color="topbar" class="mt-5">
-        <template v-if="$store.state.currentUser === null">
-          <v-list-item v-for="(item, i) in links" class="white--text" :key="i" :to="item.to">
-            <v-list-item-title class="text-subtitle-1 font-weight-light white--text text-center">
-              <v-icon color="white" class="mr-5">{{ item.icon }}</v-icon> {{ item.title }}
-            </v-list-item-title>
-          </v-list-item>
-          <v-list-item class="white--text" to="/login">
-            <v-list-item-title class="text-subtitle-1 font-weight-light white--text text-center">
-              <v-icon color="white" class="mr-5">mdi-login</v-icon> Login
-            </v-list-item-title>
-          </v-list-item>
-          <v-list-item class="white--text" to="/register">
-            <v-list-item-title class="text-subtitle-1 font-weight-light white--text text-center">
-              <v-icon color="white" class="mr-5">mdi-pencil</v-icon> Register
-            </v-list-item-title>
-          </v-list-item>
-        </template>
-      </v-list>
-    </v-navigation-drawer>
-
     <!-- App Header Bar (i.e., toolbar) -->
-    <v-app-bar app color="topbar" flat height="70">
+    <v-app-bar app clipped-left color="primary" flat height="70">
       <v-container class="fill-height pa-0">
         <!-- App Bar row -->
         <v-row no-gutters justify="space-between" align="center">
@@ -182,6 +115,73 @@
         </v-row>
       </v-container>
     </v-app-bar>
+
+    <!-- Sidebar Navigation Menu -->
+    <v-navigation-drawer v-model="drawer" app clipped color="topbar">
+      <!-- Sidebar Nav Links for logged-in user -->
+      <template v-if="$store.state.currentUser !== null">
+        <v-list dense nav style="list-style: none" class="mt-3 mb-3 text-center">
+          <!-- Avatar -->
+          <li class="text-center">
+            <v-avatar class="align-self-center" height="100" width="110">
+              <v-icon size="50" color="white">mdi-human-child</v-icon>
+            </v-avatar>
+          </li>          
+          <!-- First Name -->
+          <li class="text-center text-h3 white--text">
+            {{ $store.state.currentUser.firstName }}
+          </li>          
+          <!-- "My Profile" Nav Link, for 'learners' -->
+          <v-list-item
+            class="mt-2"
+            :to="'/myprofile'"
+            v-if="$store.state.currentUser && $store.state.currentUser.type === 'learner'"
+          >
+            <v-list-item-title class="text-subtitle-1 font-weight-light white--text text-center">
+              <v-icon color="white" class="mr-5">mdi-account-details</v-icon> My Profile
+            </v-list-item-title>
+          </v-list-item>
+          <!-- "Manage Users" Nav Link, for 'admins' -->
+          <v-list-item
+            class="mt-2"
+            :to="'/manage'"
+            v-if="$store.state.currentUser && $store.state.currentUser.type === 'admin'"
+          >
+            <v-list-item-title class="text-subtitle-1 font-weight-light white--text text-center">
+              <v-icon color="white" class="mr-5">mdi-cog</v-icon> Manage Users
+            </v-list-item-title>
+          </v-list-item>
+          <!-- "Log out" Nav Link -->
+          <v-list-item @click="logOut" class="mt-2">
+            <v-list-item-title class="text-subtitle-1 font-weight-light white--text text-center">
+              <v-icon color="white" class="mr-5">mdi-login-variant</v-icon> Log out
+            </v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </template>
+
+      <!-- Sidebar Nav Links for non-logged-in user -->
+      <v-list expand color="topbar" class="mt-5">
+        <template v-if="$store.state.currentUser === null">
+          <v-list-item v-for="(item, i) in links" class="white--text" :key="i" :to="item.to">
+            <v-list-item-title class="text-subtitle-1 font-weight-light white--text text-center">
+              <v-icon color="white" class="mr-5">{{ item.icon }}</v-icon> {{ item.title }}
+            </v-list-item-title>
+          </v-list-item>
+          <v-list-item class="white--text" to="/login">
+            <v-list-item-title class="text-subtitle-1 font-weight-light white--text text-center">
+              <v-icon color="white" class="mr-5">mdi-login</v-icon> Login
+            </v-list-item-title>
+          </v-list-item>
+          <v-list-item class="white--text" to="/register">
+            <v-list-item-title class="text-subtitle-1 font-weight-light white--text text-center">
+              <v-icon color="white" class="mr-5">mdi-pencil</v-icon> Register
+            </v-list-item-title>
+          </v-list-item>
+        </template>
+      </v-list>
+    </v-navigation-drawer>
+
   </div>
 </template>
 
@@ -212,3 +212,5 @@ export default {
   },
 };
 </script>
+
+
