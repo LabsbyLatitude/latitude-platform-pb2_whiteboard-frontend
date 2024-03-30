@@ -1,16 +1,22 @@
 <template>
   <div>
+
+    <!-- Sidebar Navigation Menu -->
     <v-navigation-drawer v-model="drawer" app temporary color="topbar">
+      <!-- Sidebar Nav Links for logged-in user -->
       <template v-if="$store.state.currentUser !== null">
         <v-list dense nav style="list-style: none" class="mt-3 mb-3 text-center">
+          <!-- Avatar -->
           <li class="text-center">
             <v-avatar class="align-self-center" height="100" width="110">
               <v-icon size="50" color="white">mdi-human-child</v-icon>
             </v-avatar>
-          </li>
+          </li>          
+          <!-- First Name -->
           <li class="text-center text-h3 white--text">
             {{ $store.state.currentUser.firstName }}
-          </li>
+          </li>          
+          <!-- "My Profile" Nav Link, for 'learners' -->
           <v-list-item
             class="mt-2"
             :to="'/myprofile'"
@@ -20,6 +26,7 @@
               <v-icon color="white" class="mr-5">mdi-account-details</v-icon> My Profile
             </v-list-item-title>
           </v-list-item>
+          <!-- "Manage Users" Nav Link, for 'admins' -->
           <v-list-item
             class="mt-2"
             :to="'/manage'"
@@ -29,6 +36,7 @@
               <v-icon color="white" class="mr-5">mdi-cog</v-icon> Manage Users
             </v-list-item-title>
           </v-list-item>
+          <!-- "Log out" Nav Link -->
           <v-list-item @click="logOut" class="mt-2">
             <v-list-item-title class="text-subtitle-1 font-weight-light white--text text-center">
               <v-icon color="white" class="mr-5">mdi-login-variant</v-icon> Log out
@@ -36,6 +44,8 @@
           </v-list-item>
         </v-list>
       </template>
+
+      <!-- Sidebar Nav Links for non-logged-in user -->
       <v-list expand color="topbar" class="mt-5">
         <template v-if="$store.state.currentUser === null">
           <v-list-item v-for="(item, i) in links" class="white--text" :key="i" :to="item.to">
@@ -56,9 +66,13 @@
         </template>
       </v-list>
     </v-navigation-drawer>
+
+    <!-- App Header Bar (i.e., toolbar) -->
     <v-app-bar app color="topbar" flat height="70">
       <v-container class="fill-height pa-0">
+        <!-- App Bar row -->
         <v-row no-gutters justify="space-between" align="center">
+          <!-- Button to open nav menu on small screens -->
           <v-col
             :class="{
               'col-auto': $vuetify.breakpoint.mdAndUp,
@@ -71,6 +85,7 @@
               ><v-icon color="white">mdi-menu</v-icon></v-btn
             >
           </v-col>
+          <!-- App Logo, navigates to site root -->
           <v-col
             :class="{
               'col-auto': $vuetify.breakpoint.mdAndUp,
@@ -86,12 +101,13 @@
             </router-link>
           </v-col>
 
-          <!-- Register Button & and User menu-->
+          <!-- Login Options & User menu -->
           <v-col
             cols="auto"
             class="center-horizontally center-vertically"
             v-if="$vuetify.breakpoint.mdAndUp"
           >
+            <!-- "Register" and "Login" buttons -->
             <template v-if="$store.state.currentUser === null">
               <v-btn
                 width="150"
@@ -107,17 +123,23 @@
                 Login
               </v-btn>
             </template>
+            <!-- User Menu Dropdown -->
             <v-menu v-else offset-y>
+              <!-- open button for menu, passed as a slot -->
               <template v-slot:activator="{ on }">
                 <v-btn color="white" outlined v-on="on" class="text-none pl-2 pr-2" x-large
-                  ><v-avatar size="30" class="mr-1 ml-0">
+                  >
+                  <!-- user icon -->
+                  <v-avatar size="30" class="mr-1 ml-0">
                     <v-icon color="white">mdi-human-child</v-icon>
                   </v-avatar>
                   <v-spacer></v-spacer>
+                  <!-- user first name -->
                   <div class="mr-5 ml-5 text-subtitle-1 font-weight-medium">
                     {{ $store.state.currentUser.firstName || 'John Doe' }}
                   </div>
                   <v-spacer></v-spacer>
+                  <!-- open icon -->
                   <v-avatar size="20" class="mx-1">
                     <v-icon>mdi-chevron-down</v-icon>
                   </v-avatar>
@@ -125,6 +147,8 @@
               </template>
 
               <v-list dense color="topbar">
+                
+                <!-- "My Profile" menu item, for 'learners' -->
                 <v-list-item
                   :to="'/myprofile'"
                   v-if="$store.state.currentUser && $store.state.currentUser.type === 'learner'"
@@ -133,6 +157,8 @@
                     My Profile
                   </v-list-item-title>
                 </v-list-item>
+                
+                <!-- "Manage Users" menu item, for 'admins' -->
                 <v-list-item
                   :to="'/manage'"
                   v-if="$store.state.currentUser && $store.state.currentUser.type === 'admin'"
@@ -141,6 +167,8 @@
                     Manage Users
                   </v-list-item-title>
                 </v-list-item>
+                
+                <!-- "Log out" menu item -->
                 <v-list-item @click="logOut">
                   <v-list-item-title class="text-subtitle-1 font-weight-light white--text">
                     Log out
@@ -148,7 +176,9 @@
                 </v-list-item>
               </v-list>
             </v-menu>
+
           </v-col>
+
         </v-row>
       </v-container>
     </v-app-bar>
@@ -165,7 +195,7 @@ export default {
         icon: 'mdi-home',
       },
     ],
-    drawer: false,
+    drawer: true,
   }),
   methods: {
     logOut() {
