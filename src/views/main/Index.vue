@@ -3,7 +3,7 @@
     <NavigationBar />
     <v-main class="background">
       <v-fade-transition mode="out-in" :appear="true" :duration="200">
-        <router-view></router-view>
+        <router-view :key="$route.fullPath"></router-view>
       </v-fade-transition>
       <!-- SnackBar to show at success of fail -->
       <v-snackbar

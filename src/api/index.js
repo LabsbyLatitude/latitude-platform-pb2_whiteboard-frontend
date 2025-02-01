@@ -20,6 +20,8 @@ const USERDATA = {
   user: {
     id: 0,
     type: 'admin',
+    firstName: 'TestFirstName',
+    lastName: 'TestLastName',
     // type: 'student',
     test_user_val: 'hi',
   },
@@ -231,7 +233,7 @@ export default {
     };
 
     return axios
-      .get(`${baseURL}/api/v1/classes/${id}`, config)
+      .get(`${baseURL}/api/v1/classes${id ? `/${id}` : ''}`, config)
       .then((response) => response.data.data)
       .catch(() => false);
   },
